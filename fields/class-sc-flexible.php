@@ -154,7 +154,11 @@ class SC_ACF_Flexible extends acf_field {
 
 		$layouts         = $field['layouts'];
 		$value           = is_array( $field['value'] ) ? $field['value'] : array();
-		$input_prefix    = "acf[{$field['key']}]";
+		// $field['name'] is already the fully-nested input path assembled by
+		// acf_prepare_field() (e.g. `acf[group_key][sc_flexible_key]` when nested
+		// inside a Group), so it must be used as-is instead of hardcoding
+		// `acf[<field_key>]`, which breaks the round-trip once nested.
+		$input_prefix    = $field['name'];
 		$button_label    = $field['button_label'] ?: __( 'レイアウトを追加', 'sc-acf-extra' );
 		$layouts_by_name = array();
 		foreach ( $layouts as $l ) {
@@ -208,7 +212,7 @@ class SC_ACF_Flexible extends acf_field {
 	 */
 	private function render_instance( $field, $layout, $index, $row_value ) {
 		$sub_fields = $layout['sub_fields'] ?? array();
-		$base       = "acf[{$field['key']}][{$index}]";
+		$base       = "{$field['name']}[{$index}]";
 		?>
 		<div class="sc-flexible-instance" data-index="<?php echo esc_attr( (string) $index ); ?>" data-layout="<?php echo esc_attr( $layout['name'] ); ?>">
 			<input type="hidden" name="<?php echo esc_attr( "{$base}[acf_fc_layout]" ); ?>" value="<?php echo esc_attr( $layout['name'] ); ?>" />

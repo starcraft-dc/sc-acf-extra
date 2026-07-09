@@ -4,7 +4,7 @@ Tags: acf, advanced-custom-fields, repeater, custom-fields
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 0.6.2
+Stable tag: 0.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ starcraft-n が制作・運用する WordPress 案件のために作られた、
 3. ACF (無料版) が有効化されていることを確認してください。
 
 == Changelog ==
+
+= 0.6.3 =
+* Fix: Group フィールドにネストした Repeater / Flexible Content が、保存すると管理画面上は空に戻って見える不具合を修正（フロント表示には反映されていた）。空に見える状態で行を追加して保存すると、既存行のデータが削除されてしまう問題も併発していた。原因は `class-sc-repeater.php` / `class-sc-flexible.php` の `render_field()` / `render_row()` / `render_instance()` が入力欄名を `acf[{$field['key']}]` のように自前で組み立てており、Group にネストされた際に `acf_prepare_field()` が用意する正しい入れ子パス（`$field['prefix']` 相当）を無視していたため。保存データが Group 側の期待する構造とズレ、`Group::load_value()` が常に空を読みに行く状態になっていた。両ファイルの入力欄名生成箇所を、自前組み立てではなく既に正しく前処理済みの `$field['name']` を使うように変更。
 
 = 0.6.2 =
 * Fix: Repeater 内の image サブフィールドで 「画像を追加」 ボタンを押してもメディアモーダルが開かない不具合を修正。`render_row()` で `acf_render_field()` を直接呼び出していたため、ACF の image コントローラが attach する `<div class="acf-field acf-field-image" data-type="image" ...>` ラッパが欠落していた。`acf_render_field_wrap()` 経由に変更し、append 時の `acf.do_action('append', $row)` で image / wysiwyg / select2 等のサブフィールドコントローラが正しく初期化されるようにした。Flexible Content 側は元から `acf_render_field_wrap()` を使っていたため変更なし。

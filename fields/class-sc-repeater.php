@@ -93,8 +93,11 @@ class SC_ACF_Repeater extends acf_field {
 		$value = is_array( $field['value'] ) ? $field['value'] : array();
 		$rows  = max( count( $value ), (int) $field['min'] );
 
-		// ACF wants every input named `acf[<field_key>]...` so $_POST['acf'][KEY] arrives in update_value().
-		$input_prefix = "acf[{$field['key']}]";
+		// $field['name'] is already the fully-nested input path assembled by
+		// acf_prepare_field() (e.g. `acf[group_key][sc_repeater_key]` when nested
+		// inside a Group), so it must be used as-is instead of hardcoding
+		// `acf[<field_key>]`, which breaks the round-trip once nested.
+		$input_prefix = $field['name'];
 
 		$wrapper_attrs = array(
 			'class'              => 'sc-repeater',
@@ -159,7 +162,7 @@ class SC_ACF_Repeater extends acf_field {
 				// Use the sub-field key for the HTML input name so the round-trip
 				// stays ACF-compatible. update_value() will translate key -> name
 				// when persisting to postmeta.
-				$sub_field['prefix'] = "acf[{$field['key']}][{$index}]";
+				$sub_field['prefix'] = "{$field['name']}[{$index}]";
 				$sub_field['name']   = $sub_field['key'];
 				$sub_field['value']  = $row_value[ $sub['key'] ] ?? '';
 				// acf_render_field_wrap outputs the `<div class="acf-field acf-field-<type>" data-type="..." data-name="...">`
