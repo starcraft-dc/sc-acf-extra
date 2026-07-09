@@ -14,7 +14,7 @@ ACF 無料版に Repeater / Flexible Content を追加する WordPress プラグ
 
 ```bash
 cd /path/to/wp-content/plugins
-git clone git@github.com:starcraft-j/sc-acf-extra.git
+git clone git@github.com:starcraft-dc/sc-acf-extra.git
 wp plugin activate sc-acf-extra
 ```
 
@@ -22,7 +22,7 @@ wp plugin activate sc-acf-extra
 
 ### B. ZIP 配布 (クライアント納品向け)
 
-[Releases](https://github.com/starcraft-j/sc-acf-extra/releases) から最新タグの ZIP をダウンロードして wp-admin の「プラグイン → 新規追加 → プラグインのアップロード」で導入。
+[Releases](https://github.com/starcraft-dc/sc-acf-extra/releases) から最新タグの ZIP をダウンロードして wp-admin の「プラグイン → 新規追加 → プラグインのアップロード」で導入。
 
 ## 使い方
 
