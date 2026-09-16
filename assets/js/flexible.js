@@ -11,14 +11,24 @@
 		return str.replace(/[-.*+?^${}()|[\]\\]/g, '\\$&');
 	}
 
+	// Mirrors ACF's acf_idify(): strtolower() first, then brackets become dashes.
+	// The lowercasing matters — it is why the PHP-rendered template carries
+	// `__index__` in `id`/`for` while `name` still carries `__INDEX__`.
+	function idify(str) {
+		return str.toLowerCase().replace(/\]\[/g, '-').replace(/\[/g, '-').replace(/\]/g, '');
+	}
+
+	// Matches either a real numeric index or the template placeholder in either case.
+	var INDEX_TOKEN = '(?:\\d+|__INDEX__|__index__)';
+
 	function reindex($wrapper) {
 		var prefix = $wrapper.attr('data-input-prefix');
 		if (!prefix) return;
 		// `name` form: acf[field_xxx][0][field_yyy]
-		var bracketPattern = new RegExp('(' + escapeRegExp(prefix) + ')\\[(\\d+|__INDEX__)\\]');
+		var bracketPattern = new RegExp('(' + escapeRegExp(prefix) + ')\\[' + INDEX_TOKEN + '\\]');
 		// `id` form: ACF replaces brackets with dashes: acf-field_xxx-0-field_yyy.
-		var idPrefix = prefix.replace(/\[/g, '-').replace(/\]/g, '');
-		var idPattern = new RegExp('(' + escapeRegExp(idPrefix) + ')-(\\d+|__INDEX__)(?=[-"]|$)');
+		var idPrefix = idify(prefix);
+		var idPattern = new RegExp('(' + escapeRegExp(idPrefix) + ')-' + INDEX_TOKEN + '(?=[-"]|$)');
 
 		$wrapper.find('> .sc-flexible-instances > .sc-flexible-instance').each(function (i) {
 			var $inst = $(this);
@@ -46,7 +56,7 @@
 		if (!$template.length) return;
 
 		var nextIndex = $wrapper.find('> .sc-flexible-instances > .sc-flexible-instance').length;
-		var html = $template.html().replace(/__INDEX__/g, nextIndex);
+		var html = $template.html().replace(/__INDEX__/gi, nextIndex);
 		var $newInst = $(html);
 		$wrapper.find('> .sc-flexible-instances').append($newInst);
 		reindex($wrapper);
