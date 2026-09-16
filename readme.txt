@@ -4,7 +4,7 @@ Tags: acf, advanced-custom-fields, repeater, custom-fields
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 0.6.3
+Stable tag: 0.6.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,10 @@ starcraft-n が制作・運用する WordPress 案件のために作られた、
 3. ACF (無料版) が有効化されていることを確認してください。
 
 == Changelog ==
+
+= 0.6.4 =
+* Fix: 「行を追加」 / レイアウト追加で新しく増やした行の `id` と `label[for]` が `acf-field_xxx-__index__-field_yyy` のまま残り採番されない不具合を修正 (Repeater / Flexible Content 共通)。原因は PHP 側がテンプレート行を描画する際、`name` は `acf[field_xxx][__INDEX__][field_yyy]` と大文字のまま出力されるのに対し、`id` / `for` は ACF の `acf_idify()` が `strtolower()` を通すため `__index__` と小文字化されていたこと。JS 側は大文字の `__INDEX__` しか置換対象にしていなかったため、`name` だけが正しく採番され `id` / `for` が取り残されていた。`reindex()` の正規表現とテンプレート展開を大文字・小文字の両方にマッチするよう変更し、あわせて `idPrefix` の生成を `acf_idify()` と同じ (小文字化してからハイフン化) 実装に揃えた。
+* Note: `name` 属性は元から正しく採番されていたため保存されるデータに影響はありません。症状はラベルをクリックしても入力欄にフォーカスが移らない・2 行以上追加すると DOM 上の id が重複する、という範囲に留まります。
 
 = 0.6.3 =
 * Fix: Group フィールドにネストした Repeater / Flexible Content が、保存すると管理画面上は空に戻って見える不具合を修正（フロント表示には反映されていた）。空に見える状態で行を追加して保存すると、既存行のデータが削除されてしまう問題も併発していた。原因は `class-sc-repeater.php` / `class-sc-flexible.php` の `render_field()` / `render_row()` / `render_instance()` が入力欄名を `acf[{$field['key']}]` のように自前で組み立てており、Group にネストされた際に `acf_prepare_field()` が用意する正しい入れ子パス（`$field['prefix']` 相当）を無視していたため。保存データが Group 側の期待する構造とズレ、`Group::load_value()` が常に空を読みに行く状態になっていた。両ファイルの入力欄名生成箇所を、自前組み立てではなく既に正しく前処理済みの `$field['name']` を使うように変更。
